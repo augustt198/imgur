@@ -30,7 +30,6 @@ module Imgur
       body[:description] = local_file.description if local_file.description
       body[:album] = local_file.album_id if local_file.album_id
       resp = post(API_PATH + UPLOAD_PATH, body).parsed_response
-      puts resp['data']
       Image.new(resp['data'])
     end
 
