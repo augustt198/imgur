@@ -3,7 +3,7 @@ require 'httparty'
 
 module Imgur
 
-
+  HTML_PATH = 'https://imgur.com/'
   API_PATH = 'https://api.imgur.com/3/'
   UPLOAD_PATH = 'upload'
 
@@ -30,7 +30,9 @@ module Imgur
       body[:description] = local_file.description if local_file.description
       body[:album] = local_file.album_id if local_file.album_id
       resp = post(API_PATH + UPLOAD_PATH, body).parsed_response
-      Image.new(resp['data'])
+      # the Imgur API doesn't send title or description back apparently.
+      data = resp['data'].merge({'title' => body[:title], 'description' => body[:description]})
+      Image.new(data)
     end
 
     def auth_header
@@ -77,6 +79,7 @@ module Imgur
     attr_accessor :section
     attr_accessor :deletehash
     attr_accessor :link
+    attr_accessor :html_link
 
     def initialize(data)
       @id = data['id']
@@ -95,6 +98,7 @@ module Imgur
       @section = data['section']
       @deletehash = data['deletehash']
       @link = data['link']
+      @html_link = HTML_PATH + @id
     end
 
   end
