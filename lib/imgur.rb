@@ -6,6 +6,7 @@ module Imgur
   HTML_PATH = 'https://imgur.com/'
   API_PATH = 'https://api.imgur.com/3/'
   UPLOAD_PATH = 'upload'
+  IMAGE_PATH = 'image/'
 
   class Client
     attr_accessor :client_id
@@ -20,6 +21,12 @@ module Imgur
 
     def get(url, data={})
       HTTParty.get(url, query: data, headers: auth_header)
+    end
+
+    def get_image(id)
+      url = API_PATH + IMAGE_PATH + id
+      resp = get(url).parsed_response
+      Image.new(resp['data'])
     end
 
     def upload(local_file)
