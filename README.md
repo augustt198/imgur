@@ -28,3 +28,11 @@ Then use the client to upload it and recieve a `Imgur::Image`
 uploaded = client.upload(image)
 # uploaded.link => http://i.imgur.com/...
 ```
+
+Creating an album is super easy!
+```ruby
+# The first argument can also be an array of images, or nil for a blank album.
+album = client.new_album(uploaded, title: 'My Photography')
+
+# album.link => http://imgur.com/a/...
+```
