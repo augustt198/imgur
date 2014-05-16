@@ -46,7 +46,7 @@ module Imgur
     end
     
     def me
-      account 'me'  
+      get_account 'me'
     end
 
     def upload(local_file)
@@ -140,7 +140,7 @@ module Imgur
       @caption = data['caption']
       @author = data['author']
       @author_id = data['author_id']
-      @on_album data['on_album']
+      @on_album = data['on_album']
       @ups = data['ups']
       @downs = data['downs']
       @points = data['points']
