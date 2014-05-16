@@ -9,6 +9,7 @@ module Imgur
   IMAGE_PATH = 'image/'
   ALBUM_GET_PATH = 'album/'
   ALBUM_CREATE_PATH = 'album'
+  ACCOUNT_PATH = 'account/'
 
   class Client
     attr_accessor :client_id
@@ -35,6 +36,17 @@ module Imgur
       url = API_PATH + ALBUM_GET_PATH + id
       resp = get(url).parsed_response
       Album.new resp['data']
+    end
+    
+    def get_account(username)
+      url = API_PATH + ACCOUNT_PATH + username
+      resp = get(url).parsed_response
+      # The Imgur API doesn't send the username back
+      Account.new resp['data'], username
+    end
+    
+    def me
+      account 'me'  
     end
 
     def upload(local_file)
@@ -81,6 +93,29 @@ module Imgur
       {'Authorization' => 'Client-ID ' + @client_id}
     end
 
+  end
+  
+  class Account
+    attr_accessor :id
+    attr_accessor :url
+    attr_accessor :bio
+    attr_accessor :reputation
+    attr_accessor :created
+    attr_accessor :pro_expiration
+    attr_accessor :username
+    
+    def initialize(data, username=nil)
+      @id = data['id']
+      @url = data['url']
+      @bio = data['bio']
+      @reputation = data['reputation']
+      @created = Time.at data['created']
+      if data['pro_expiration'].is_a? Integer
+        @pro = Time.at
+      end
+      @username = username
+    end
+    
   end
 
   class Album
