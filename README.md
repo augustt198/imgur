@@ -4,11 +4,18 @@ Ruby wrapper for the Imgur API.
 
 ## Installation
 
-If you're using Bundler:
+Install with RubyGems:
 
 ```ruby
-gem 'imgur', github: 'augustt198/imgur'
+gem install 'imgur-api'
 ```
+
+Or add to your Gemfile:
+
+```ruby
+gem 'imgur-api'
+```
+
 
 ## Usage
 
