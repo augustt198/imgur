@@ -117,6 +117,58 @@ module Imgur
     end
     
   end
+  
+  class Comment
+    attr_accessor :id
+    attr_accessor :image_id
+    attr_accessor :caption
+    attr_accessor :author
+    attr_accessor :author
+    attr_accessor :author_id
+    attr_accessor :on_album
+    attr_accessor :ups
+    attr_accessor :downs
+    attr_accessor :points
+    attr_accessor :date
+    attr_accessor :parent_id
+    attr_accessor :deleted
+    attr_accessor :children
+    
+    def initialize(data)
+      @id = data['id']
+      @image_id = data['image_id']
+      @caption = data['caption']
+      @author = data['author']
+      @author_id = data['author_id']
+      @on_album data['on_album']
+      @ups = data['ups']
+      @downs = data['downs']
+      @points = data['points']
+      @date = Time.at data['datetime']
+      @parent_id = data['parent_id']
+      @deleted = deleted
+    end
+  
+    def on_album?
+      @on_album
+    end
+    
+    def upvotes
+      @ups
+    end
+    
+    def downvotes
+      @downs
+    end
+    
+    def has_parent?
+      @parent_id != nil
+    end
+    
+    def deleted?
+      @deleted
+    end
+  end
 
   class Album
     attr_accessor :id
