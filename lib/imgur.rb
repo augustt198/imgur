@@ -7,6 +7,8 @@ module Imgur
   API_PATH = 'https://api.imgur.com/3/'
   UPLOAD_PATH = 'upload'
   IMAGE_PATH = 'image/'
+  ALBUM_GET_PATH = 'album/'
+  ALBUM_CREATE_PATH = 'album'
 
   class Client
     attr_accessor :client_id
@@ -29,6 +31,12 @@ module Imgur
       Image.new(resp['data'])
     end
 
+    def get_album(id)
+      url = API_PATH + ALBUM_GET_PATH + id
+      resp = get(url).parsed_response
+      Album.new resp['data']
+    end
+
     def upload(local_file)
       local_file.file.rewind
       image = local_file.file.read
@@ -42,13 +50,78 @@ module Imgur
       Image.new(data)
     end
 
+    def new_album(images=nil, options={})
+      image_ids = []
+      if images.is_a? Array
+        if images[0].is_a? Image
+          images.each do |img|
+            image_ids << img.id
+          end
+        elsif images[0].is_a? String
+          image_ids = images
+        end
+      elsif
+        if images.is_a? Image
+          image_ids << images.id
+        elsif images.is_a? String
+          image_ids << images
+        end
+      end
+      options[:cover] = options[:cover].id if options[:cover].is_a? Image
+      body = {ids: image_ids}.merge options
+      url = API_PATH + ALBUM_CREATE_PATH
+      resp = post(url, body).parsed_response
+      id = resp['data']['id']
+      album = get_album id
+      album.deletehash = resp['data']['deletehash']
+      album
+    end
+
     def auth_header
       {'Authorization' => 'Client-ID ' + @client_id}
     end
 
   end
 
-  # Represent an image stored on the computer
+  class Album
+    attr_accessor :id
+    attr_accessor :title
+    attr_accessor :description
+    attr_accessor :date
+    attr_accessor :cover
+    attr_accessor :cover_width
+    attr_accessor :cover_height
+    attr_accessor :account_url
+    attr_accessor :privacy
+    attr_accessor :layout
+    attr_accessor :views
+    attr_accessor :link
+    attr_accessor :deletehash
+    attr_accessor :images_count
+    attr_accessor :images
+
+    def initialize(data)
+      @id = data['id']
+      @title = data['title']
+      @description = data['description']
+      @date = Time.at data['datetime']
+      @cover = data['cover']
+      @cover_width = data['cover_width']
+      @account_url = data['account_url']
+      @privacy = data['privacy']
+      @layout = data['layout']
+      @views = data['views']
+      @link = data['link']
+      @deletehash = data['deletehash']
+      @images_count = data['images_count']
+      @images = []
+      data['images'].each do |img|
+        @images << Image.new(img)
+      end
+    end
+  end
+
+  # Represents an image stored on the computer
   class LocalImage
     attr_accessor :file
     attr_accessor :title
