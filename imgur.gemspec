@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'imgur/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'imgur'
+  spec.name          = 'imgur-api'
   spec.version       = Imgur::VERSION
   spec.authors       = ['August']
   spec.email         = ['augustt198@gmail.com']
