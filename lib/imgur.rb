@@ -1,5 +1,6 @@
 require 'imgur/version'
 require 'httparty'
+require 'net/http'
 
 module Imgur
 
@@ -19,11 +20,15 @@ module Imgur
     end
 
     def post(url, body={})
-      HTTParty.post(url, body: body, headers: auth_header)
+      resp = HTTParty.post(url, body: body, headers: auth_header)
+      raise NotFoundException.new if resp.response.is_a? Net::HTTPNotFound
+      resp
     end
 
-    def get(url, data={})
-      HTTParty.get(url, query: data, headers: auth_header)
+    def get(url, query={})
+      resp = HTTParty.get(url, query: query, headers: auth_header)
+      raise NotFoundException.new if resp.response.is_a? Net::HTTPNotFound
+      resp
     end
 
     def get_image(id)
@@ -268,6 +273,12 @@ module Imgur
       @html_link = HTML_PATH + @id
     end
 
+  end
+
+  class NotFoundException < Exception
+    def initialize(msg='404 Not Found')
+      super(msg)
+    end
   end
 
   def self.new(client_id)
