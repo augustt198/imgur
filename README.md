@@ -6,8 +6,8 @@ Ruby wrapper for the Imgur API.
 
 Install with RubyGems:
 
-```ruby
-gem install 'imgur-api'
+```sh
+$ gem install imgur-api
 ```
 
 Or add to your Gemfile:
