@@ -42,14 +42,18 @@ module Imgur
       resp = get(url).parsed_response
       Album.new resp['data']
     end
-    
+
     def get_account(username)
       url = API_PATH + ACCOUNT_PATH + username
       resp = get(url).parsed_response
       # The Imgur API doesn't send the username back
       Account.new resp['data'], username
     end
-    
+
+    def update_album(album)
+      album.update self
+    end
+
     def me
       get_account 'me'
     end
@@ -99,16 +103,10 @@ module Imgur
     end
 
   end
-  
+
   class Account
-    attr_accessor :id
-    attr_accessor :url
-    attr_accessor :bio
-    attr_accessor :reputation
-    attr_accessor :created
-    attr_accessor :pro_expiration
-    attr_accessor :username
-    
+    attr_accessor :id, :url, :bio, :reputation, :created, :pro_expiration,
+                  :username
     def initialize(data, username=nil)
       @id = data['id']
       @url = data['url']
@@ -120,25 +118,13 @@ module Imgur
       end
       @username = username
     end
-    
+
   end
-  
+
   class Comment
-    attr_accessor :id
-    attr_accessor :image_id
-    attr_accessor :caption
-    attr_accessor :author
-    attr_accessor :author
-    attr_accessor :author_id
-    attr_accessor :on_album
-    attr_accessor :ups
-    attr_accessor :downs
-    attr_accessor :points
-    attr_accessor :date
-    attr_accessor :parent_id
-    attr_accessor :deleted
-    attr_accessor :children
-    
+    attr_accessor :id, :image_id, :caption, :author, :author_id, :on_album, :ups,
+                  :downs, :points, :date, :parent_id, :deleted, :children
+
     def initialize(data)
       @id = data['id']
       @image_id = data['image_id']
@@ -153,44 +139,32 @@ module Imgur
       @parent_id = data['parent_id']
       @deleted = deleted
     end
-  
+
     def on_album?
       @on_album
     end
-    
+
     def upvotes
       @ups
     end
-    
+
     def downvotes
       @downs
     end
-    
+
     def has_parent?
       @parent_id != nil
     end
-    
+
     def deleted?
       @deleted
     end
   end
 
   class Album
-    attr_accessor :id
-    attr_accessor :title
-    attr_accessor :description
-    attr_accessor :date
-    attr_accessor :cover
-    attr_accessor :cover_width
-    attr_accessor :cover_height
-    attr_accessor :account_url
-    attr_accessor :privacy
-    attr_accessor :layout
-    attr_accessor :views
-    attr_accessor :link
-    attr_accessor :deletehash
-    attr_accessor :images_count
-    attr_accessor :images
+    attr_accessor :id, :title, :description, :date, :cover, :cover_width,
+                  :cover_height, :account_url, :privacy, :layout, :views,
+                  :link, :deletehash, :images_count, :images
 
     def initialize(data)
       @id = data['id']
@@ -211,14 +185,38 @@ module Imgur
         @images << Image.new(img)
       end
     end
+
+    def update(client)
+      if @deletehash == nil
+        raise UpdateException.new 'Album must have a deletehash to update'
+      end
+      url = API_PATH + ALBUM_GET_PATH + @deletehash
+      image_ids = []
+      # Make sure we're only strings
+      @images.each do |img|
+        if img.is_a? Image
+          image_ids << img.id
+        elsif img.is_a? String
+          image_ids << img
+        end
+      end
+      body = {
+          ids: @images,
+          title: @title,
+          description: @description,
+          privacy: @privacy,
+          layout: @layout,
+          cover: @cover
+      }
+      puts body
+      client.post(url, body: body)
+    end
+
   end
 
   # Represents an image stored on the computer
   class LocalImage
-    attr_accessor :file
-    attr_accessor :title
-    attr_accessor :description
-    attr_accessor :album_id
+    attr_accessor :file, :title, :description, :album_id
 
     def initialize(file, options={})
       if file.is_a? String
@@ -235,23 +233,9 @@ module Imgur
 
   # Represents an image on Imgur
   class Image
-    attr_accessor :id
-    attr_accessor :title
-    attr_accessor :description
-    attr_accessor :date # Time object of :datetime
-    attr_accessor :type
-    attr_accessor :animated
-    attr_accessor :width
-    attr_accessor :height
-    attr_accessor :size
-    attr_accessor :views
-    attr_accessor :bandwidth
-    attr_accessor :favorite
-    attr_accessor :nsfw
-    attr_accessor :section
-    attr_accessor :deletehash
-    attr_accessor :link
-    attr_accessor :html_link
+    attr_accessor :id, :title, :description, :date, :type, :animated, :width,
+                  :height, :size, :views, :bandwidth, :favorite, :nsfw, :section,
+                  :deletehash, :link, :html_link
 
     def initialize(data)
       @id = data['id']
@@ -277,7 +261,13 @@ module Imgur
 
   class NotFoundException < Exception
     def initialize(msg='404 Not Found')
-      super(msg)
+      super msg
+    end
+  end
+
+  class UpdateException < Exception
+    def initialize(msg)
+      super msg
     end
   end
 
