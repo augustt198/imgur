@@ -6,7 +6,7 @@ module Imgur
 
   HTML_PATH = 'https://imgur.com/'
   API_PATH = 'https://api.imgur.com/3/'
-  UPLOAD_PATH = 'upload'
+  UPLOAD_PATH = 'image'
   IMAGE_PATH = 'image/'
   ALBUM_GET_PATH = 'album/'
   ALBUM_CREATE_PATH = 'album'
